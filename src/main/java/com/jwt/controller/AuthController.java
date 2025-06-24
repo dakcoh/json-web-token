@@ -27,4 +27,10 @@ public class AuthController {
         // 로그인 성공: JWT 토큰 반환
         return ResponseEntity.ok(token);
     }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody LoginRequest request) {
+        authService.register(request.getUsername(), request.getPassword());
+        return ResponseEntity.ok("User registered successfully");
+    }
 }

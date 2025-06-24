@@ -18,4 +18,9 @@ public class User {
     private String username;
     @Column(name = "password", nullable = false)
     private String password;  // 해시된 비밀번호
+
+    public User(String username, String encodedPassword) {
+        this.username = username;
+        this.password = encodedPassword;
+    }
 }

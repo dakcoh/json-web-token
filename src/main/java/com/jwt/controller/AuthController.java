@@ -21,9 +21,8 @@ public class AuthController {
 
         if (token == null) {
             // 로그인 실패: 인증 실패시 처리
-            return ResponseEntity.status(401).body("Invalid Credentials");
+            return ResponseEntity.status(401).body("로그인 실패: 잘못된 자격 증명");
         }
-
         // 로그인 성공: JWT 토큰 반환
         return ResponseEntity.ok(token);
     }
@@ -31,6 +30,11 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody LoginRequest request) {
         authService.register(request.getUsername(), request.getPassword());
-        return ResponseEntity.ok("User registered successfully");
+        return ResponseEntity.ok("사용자가 성공적으로 등록되었습니다");
+    }
+
+    @GetMapping("/authpost")
+    public ResponseEntity<String> authpost() {
+        return ResponseEntity.ok("인증된 사용자입니다.");
     }
 }

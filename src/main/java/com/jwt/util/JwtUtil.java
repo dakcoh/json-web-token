@@ -1,6 +1,5 @@
 package com.jwt.util;
 
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -9,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.util.Date;
 
 @Component
 public class JwtUtil {
@@ -26,33 +26,38 @@ public class JwtUtil {
     }
 
     // 토큰 생성
-    public String generateToken(String username, String userId, long expiration) {
+    public String generateToken(String username, String userId, long expirationMillis) {
+        long nowMillis = System.currentTimeMillis();
+        Date now = new Date(nowMillis);
+        Date expiryDate = new Date(nowMillis + expirationMillis); // ← 정확한 만료일 설정
+
         return Jwts.builder()
                 .header().type("JWT").and()
                 .issuer("server")
                 .subject("subject")
                 .audience().add(username).and()
-                .claim("iat", System.currentTimeMillis()) // 발행 시간
-                .claim("exp", expiration) // 만료 시간
+                .issuedAt(now)             // 발행 시간
+                .expiration(expiryDate)
                 .claim("userId", userId)
-                .signWith(key, SignatureAlgorithm.HS256) // 키로 서명
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-//    // 토큰 검증
-//    public static boolean validateToken(String token, Object expectedAudience) {
-//        try {
-//            // SignedClaims 파싱 및 Audience 검증
-//            return Jwts.parser()
-//                    .verifyWith(key) // 서명 키 설정
-//                    .build()
-//                    .parseSignedClaims(token) // 서명된 JWT 파싱
-//                    .getPayload()
-//                    .getAudience()
-//                    .equals(expectedAudience); // Audience 비교
-//        } catch (JwtException e) {
-//            System.err.println("Invalid Token: " + e.getMessage());
-//            return false; // 유효하지 않은 경우 false 반환
-//        }
-//    }
+    public boolean validateToken(String token) {
+        Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token);
+        return true;
+    }
+
+    public String getUsernameFromToken(String token) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getAudience()
+                .toString();
+    }
 }
